@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2026, MarketRange"
 #property link        "https://github.com/marketrange"
-#property version     "1.0.0"
+#property version     "1.01"
 #property strict
 #property indicator_chart_window
 
