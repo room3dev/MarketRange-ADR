@@ -1,5 +1,7 @@
 # MarketRange ADR
 
+![MarketRange ADR Screenshot](MarketRange_ADR.png)
+
 Professional Average Daily Range (ADR) tracker for MetaTrader 4.
 
 MarketRange ADR is a comprehensive tool designed to help traders track market volatility and daily range expansions. Unlike standard ADR indicators, it includes critical metrics like the Daily Open, Mid-point levels, and dual-percentage tracking to show exactly where the price sits relative to its expected daily movement.
