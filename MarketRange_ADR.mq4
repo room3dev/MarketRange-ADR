@@ -55,6 +55,8 @@ int OnInit()
 void OnDeinit(const int reason)
 {
     DeleteAllObjects();
+    Comment("");
+    ChartRedraw();
 }
 
 //+------------------------------------------------------------------+
@@ -329,7 +331,7 @@ void DeleteAllObjects()
     for(int i = ObjectsTotal() - 1; i >= 0; i--)
     {
         string name = ObjectName(i);
-        if(StringSubstr(name, 0, 8) == "[MR_ADR]")
+        if(StringFind(name, "[MR_ADR]") == 0)
         ObjectDelete(name);
     }
 }
