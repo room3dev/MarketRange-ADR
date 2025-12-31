@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2026, MarketRange"
 #property link        "https://github.com/marketrange"
-#property version     "1.01"
+#property version     "1.02"
 #property strict
 #property indicator_chart_window
 
@@ -199,11 +199,11 @@ const int &spread[])
    
     if(range > 0)
     {
-        up_size = ((close[0] - adr_low) / range) * 100.0;
-        down_size = ((adr_high - close[0]) / range) * 100.0;
+        up_size = ((adr_high - close[0]) / range) * 100.0;
+        down_size = ((close[0] - adr_low) / range) * 100.0;
     }
 
-    string move_text = "Up size: " + DoubleToStr(up_size, 1) + " % / Down Size: " + DoubleToStr(down_size, 1) + " % ";
+    string move_text = "Upsize: " + DoubleToStr(up_size, 1) + " % / Down Size: " + DoubleToStr(down_size, 1) + " % ";
     SetLabel("ADR Percent", move_text, LabelColor, LabelFontSize, 10, 10);
 
     string infoStr = "MarketRange ADR(" + IntegerToString(ATRPeriod) + "): " + DoubleToStr(adr / Point, 0) + " pips\n" +
