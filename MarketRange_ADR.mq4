@@ -6,8 +6,8 @@
 //| mid-points, and relative range percentage metrics.               |
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2026, MarketRange"
-#property link        "https://github.com/marketrange"
-#property version     "1.02"
+#property link        "https://github.com/room3dev/MarketRange-ADR"
+#property version     "1.03"
 #property strict
 #property indicator_chart_window
 
@@ -22,6 +22,8 @@ input int LineThickness2 = 2; // Thickness for range reached
 input color LineColor2 = clrBlue; // Color for range reached
 input color LineColorOpen = clrGray; // Daily Open line color
 input color LineColorMid = clrSilver;// ADR Middle line color
+input color LineColorPDH_PDL = clrOrange;// Previous Day High/Low color
+input int LineStylePDH_PDL = STYLE_DOT;// Previous Day High/Low style
 input color LabelColor = clrWhite;// Percent label color
 input int LabelFontSize = 12; // Percent label size
 input bool SendEmailAlert = false; // Send email when ADR reached
@@ -175,10 +177,28 @@ const int &spread[])
     }
 
    // ADR Middle level
-    double adr_mid = (adr_high + adr_low) / 2.0;
+   double adr_mid = (adr_high + adr_low) / 2.0;
+
+   // Previous Day High/Low
+   double prev_day_high = 0;
+   double prev_day_low = 0;
+   datetime prev_day_start_time = 0;
+
+   if(idxfirstbarofyesterday > 0 && idxlastbarofyesterday >= idxfirstbarofyesterday)
+   {
+      prev_day_start_time = time[idxfirstbarofyesterday];
+      prev_day_high = high[idxfirstbarofyesterday];
+      prev_day_low = low[idxfirstbarofyesterday];
+
+      for(int k = idxfirstbarofyesterday; k <= idxlastbarofyesterday; k++)
+      {
+         prev_day_high = MathMax(prev_day_high, high[k]);
+         prev_day_low = MathMin(prev_day_low, low[k]);
+      }
+   }
 
    // Visuals
-    SetTimeLine("today start", "ADR Start", idxfirstbaroftoday);
+   SetTimeLine("today start", "ADR Start", idxfirstbaroftoday);
 
     color col = adr_reached ? LineColor2 : LineColor1;
     int thickness = adr_reached ? LineThickness2 : LineThickness1;
@@ -192,8 +212,14 @@ const int &spread[])
 
     SetLevel("ADR High", adr_high, col, LineStyle, thickness, startofday);
     SetLevel("ADR Low", adr_low, col, LineStyle, thickness, startofday);
-    SetLevel("ADR Mid", adr_mid, LineColorMid, STYLE_DOT, 1, startofday);
-    SetLevel("Daily Open", today_open, LineColorOpen, STYLE_SOLID, 1, startofday);
+   SetLevel("ADR Mid", adr_mid, LineColorMid, STYLE_DOT, 1, startofday);
+   SetLevel("Daily Open", today_open, LineColorOpen, STYLE_SOLID, 1, startofday);
+   
+   if(prev_day_high > 0 && prev_day_low > 0)
+   {
+      SetLevel("Prev Day High", prev_day_high, LineColorPDH_PDL, LineStylePDH_PDL, 1, prev_day_start_time);
+      SetLevel("Prev Day Low", prev_day_low, LineColorPDH_PDL, LineStylePDH_PDL, 1, prev_day_start_time);
+   }
 
    // Calculate Move Percents
     double up_size = 0, down_size = 0;
