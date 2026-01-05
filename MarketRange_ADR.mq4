@@ -15,9 +15,9 @@
 input int TimeZoneOfData = 0; // Chart time zone(from GMT)
 input int TimeZoneOfSession = 0; // Dest time zone(from GMT)
 input int ATRPeriod = 15; // Period for ATR
-input int LineStyle = STYLE_DOT;
+input int LineStyle = STYLE_SOLID;
 input int LineThickness1 = 1; // Normal thickness
-input color LineColor1 = clrRed; // Normal color
+input color LineColor1 = clrBlue; // Normal color
 input int LineThickness2 = 2; // Thickness for range reached
 input color LineColor2 = clrBlue; // Color for range reached
 input color LineColorOpen = clrGray; // Daily Open line color
