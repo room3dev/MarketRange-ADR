@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2026, MarketRange"
 #property link        "https://github.com/room3dev/MarketRange-ADR"
-#property version     "1.03"
+#property version     "1.04"
 #property strict
 #property indicator_chart_window
 
@@ -184,13 +184,13 @@ const int &spread[])
    double prev_day_low = 0;
    datetime prev_day_start_time = 0;
 
-   if(idxfirstbarofyesterday > 0 && idxlastbarofyesterday >= idxfirstbarofyesterday)
+   if(idxfirstbarofyesterday > 0 && idxfirstbarofyesterday > idxlastbarofyesterday)
    {
       prev_day_start_time = time[idxfirstbarofyesterday];
       prev_day_high = high[idxfirstbarofyesterday];
       prev_day_low = low[idxfirstbarofyesterday];
 
-      for(int k = idxfirstbarofyesterday; k <= idxlastbarofyesterday; k++)
+      for(int k = idxfirstbarofyesterday; k >= idxlastbarofyesterday; k--)
       {
          prev_day_high = MathMax(prev_day_high, high[k]);
          prev_day_low = MathMin(prev_day_low, low[k]);
