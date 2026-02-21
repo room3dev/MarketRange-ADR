@@ -37,7 +37,9 @@ MarketRange ADR is a comprehensive tool designed to help traders track market vo
 - `ShowSpread`: Toggle the current spread display (default: true).
 - `SpreadColor`: Customizable color for the spread display.
 - `SpreadFontSize`: Customize the font size for the spread.
-- `SpreadX`, `SpreadY`: Adjust the spread display position in the top-right corner.
+- `SpreadX`, `SpreadY`: Adjust the spread display position.
+- `MaxSpreadLimit`: The spread threshold in pips. If exceeded, the color changes to the alert color.
+- `SpreadAlertColor`: The color used for the spread display when it exceeds the limit.
 - `SendEmailAlert`: Enable/disable email notifications on range hits.
 
 ## License

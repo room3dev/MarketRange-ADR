@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2026, MarketRange"
 #property link        "https://github.com/room3dev/MarketRange-ADR"
-#property version     "1.07"
+#property version     "1.08"
 #property strict
 #property indicator_chart_window
 
@@ -33,6 +33,8 @@ input color SpreadColor = clrWhite; // Spread color
 input int SpreadFontSize = 10; // Spread font size
 input int SpreadX = 10; // Spread X distance
 input int SpreadY = 30; // Spread Y distance
+input double MaxSpreadLimit = 1.5; // Max Spread (pips) for Normal color
+input color SpreadAlertColor = clrRed; // High spread color
 input bool SendEmailAlert = false; // Send email when ADR reached
 input bool DebugLogger = false;
 
@@ -258,12 +260,16 @@ const int &spread[])
     // Display Spread
     if(ShowSpread)
     {
-        double currentSpread = (Ask - Bid) / Point;
-        // Adjust for 5-digit/3-digit brokers to show pips
-        if(Digits == 3 || Digits == 5) currentSpread /= 10.0;
+        double spreadInPoints = (Ask - Bid) / Point;
+        double spreadInPips = spreadInPoints;
         
-        string spreadText = "Spread: " + DoubleToStr(currentSpread, 1);
-        SetLabel("Spread", spreadText, SpreadColor, SpreadFontSize, SpreadX, SpreadY);
+        // Adjust for 5-digit/3-digit brokers
+        if(Digits == 3 || Digits == 5) spreadInPips /= 10.0;
+        
+        color currentLabelColor = (spreadInPips > MaxSpreadLimit) ? SpreadAlertColor : SpreadColor;
+        
+        string spreadText = "Spread: " + DoubleToStr(spreadInPips, 1);
+        SetLabel("Spread", spreadText, currentLabelColor, SpreadFontSize, SpreadX, SpreadY);
     }
     else
         ObjectDelete("[MR_ADR] Spread Label");
