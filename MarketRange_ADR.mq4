@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2026, MarketRange"
 #property link        "https://github.com/room3dev/MarketRange-ADR"
-#property version     "1.10"
+#property version     "1.11"
 #property strict
 #property indicator_chart_window
 
@@ -30,14 +30,14 @@ input bool ShowPercentLabel = false; // Show Upsize/Down Size label
 input bool ShowMidLine = false; // Show ADR Mid line
 input bool ShowSpread = true; // Show current Spread
 input color SpreadColor = clrWhite; // Spread color
-input int SpreadFontSize = 10; // Spread font size
+input int SpreadFontSize = 16; // Spread font size
 input int SpreadX = 10; // Spread X distance
-input int SpreadY = 30; // Spread Y distance
+input int SpreadY = 20; // Spread Y distance
 input double MaxSpreadLimit = 1.5; // Max Spread (pips) for Normal color
 input color SpreadAlertColor = clrRed; // High spread color
 input bool ShowTimer = true; // Show Bar Close Timer
 input color TimerColor = clrWhite; // Timer color
-input int TimerFontSize = 10; // Timer font size
+input int TimerFontSize = 16; // Timer font size
 input int TimerX = 10; // Timer X distance
 input int TimerY = 50; // Timer Y distance
 input bool SendEmailAlert = false; // Send email when ADR reached
