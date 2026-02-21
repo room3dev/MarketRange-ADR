@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2026, MarketRange"
 #property link        "https://github.com/room3dev/MarketRange-ADR"
-#property version     "1.04"
+#property version     "1.06"
 #property strict
 #property indicator_chart_window
 
@@ -17,15 +17,22 @@ input int TimeZoneOfSession = 0; // Dest time zone(from GMT)
 input int ATRPeriod = 15; // Period for ATR
 input int LineStyle = STYLE_SOLID;
 input int LineThickness1 = 1; // Normal thickness
-input color LineColor1 = clrBlue; // Normal color
+input color LineColor1 = clrMagenta; // Normal color
 input int LineThickness2 = 2; // Thickness for range reached
-input color LineColor2 = clrBlue; // Color for range reached
+input color LineColor2 = clrMagenta; // Color for range reached
 input color LineColorOpen = clrGray; // Daily Open line color
 input color LineColorMid = clrSilver;// ADR Middle line color
 input color LineColorPDH_PDL = clrOrange;// Previous Day High/Low color
 input int LineStylePDH_PDL = STYLE_SOLID;// Previous Day High/Low style
 input color LabelColor = clrWhite;// Percent label color
 input int LabelFontSize = 12; // Percent label size
+input bool ShowPercentLabel = false; // Show Upsize/Down Size label
+input bool ShowMidLine = false; // Show ADR Mid line
+input bool ShowSpread = true; // Show current Spread
+input color SpreadColor = clrWhite; // Spread color
+input int SpreadFontSize = 10; // Spread font size
+input int SpreadX = 10; // Spread X distance
+input int SpreadY = 30; // Spread Y distance
 input bool SendEmailAlert = false; // Send email when ADR reached
 input bool DebugLogger = false;
 
@@ -212,7 +219,12 @@ const int &spread[])
 
     SetLevel("ADR High", adr_high, col, LineStyle, thickness, startofday);
     SetLevel("ADR Low", adr_low, col, LineStyle, thickness, startofday);
-   SetLevel("ADR Mid", adr_mid, LineColorMid, STYLE_DOT, 1, startofday);
+   
+   if(ShowMidLine)
+      SetLevel("ADR Mid", adr_mid, LineColorMid, STYLE_DOT, 1, startofday);
+   else
+      ObjectDelete("[MR_ADR] ADR Mid Line");
+
    SetLevel("Daily Open", today_open, LineColorOpen, STYLE_SOLID, 1, startofday);
    
    if(prev_day_high > 0 && prev_day_low > 0)
@@ -232,12 +244,26 @@ const int &spread[])
     }
 
     string move_text = "Upsize: " + DoubleToStr(up_size, 1) + " % / Down Size: " + DoubleToStr(down_size, 1) + " % ";
-    SetLabel("ADR Percent", move_text, LabelColor, LabelFontSize, 10, 10);
+   
+   if(ShowPercentLabel)
+      SetLabel("ADR Percent", move_text, LabelColor, LabelFontSize, 10, 10);
+   else
+      ObjectDelete("[MR_ADR] ADR Percent Label");
 
-    string infoStr = "MarketRange ADR(" + IntegerToString(ATRPeriod) + "): " + DoubleToStr(adr / Point, 0) + " pips\n" +
-    "Today Range: " + DoubleToStr((today_high - today_low) / Point, 0) + " pips\n" +
-    "ADR Reached: " + (adr_reached ? "YES" : "NO");
     Comment(infoStr);
+
+    // Display Spread
+    if(ShowSpread)
+    {
+        double currentSpread = (Ask - Bid) / Point;
+        // Adjust for 5-digit/3-digit brokers to show pips
+        if(Digits == 3 || Digits == 5) currentSpread /= 10.0;
+        
+        string spreadText = "Spread: " + DoubleToStr(currentSpread, 1);
+        SetLabel("Spread", spreadText, SpreadColor, SpreadFontSize, SpreadX, SpreadY);
+    }
+    else
+        ObjectDelete("[MR_ADR] Spread Label");
 
     return(rates_total);
 }

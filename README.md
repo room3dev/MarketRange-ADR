@@ -32,6 +32,12 @@ MarketRange ADR is a comprehensive tool designed to help traders track market vo
 - `ATRPeriod`: The number of days used to calculate the average range (default: 15).
 - `LineColorOpen`: Color for the Daily Open price line.
 - `LineColorMid`: Color for the average ADR mid-point line.
+- `ShowPercentLabel`: Toggle the Upsize/Down Size percentage label (default: true).
+- `ShowMidLine`: Toggle the ADR middle line visibility (default: true).
+- `ShowSpread`: Toggle the current spread display (default: true).
+- `SpreadColor`: Customizable color for the spread display.
+- `SpreadFontSize`: Customize the font size for the spread.
+- `SpreadX`, `SpreadY`: Adjust the spread display position in the top-right corner.
 - `SendEmailAlert`: Enable/disable email notifications on range hits.
 
 ## License
