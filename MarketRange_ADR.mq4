@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2026, MarketRange"
 #property link        "https://github.com/room3dev/MarketRange-ADR"
-#property version     "1.08"
+#property version     "1.10"
 #property strict
 #property indicator_chart_window
 
@@ -35,6 +35,11 @@ input int SpreadX = 10; // Spread X distance
 input int SpreadY = 30; // Spread Y distance
 input double MaxSpreadLimit = 1.5; // Max Spread (pips) for Normal color
 input color SpreadAlertColor = clrRed; // High spread color
+input bool ShowTimer = true; // Show Bar Close Timer
+input color TimerColor = clrWhite; // Timer color
+input int TimerFontSize = 10; // Timer font size
+input int TimerX = 10; // Timer X distance
+input int TimerY = 50; // Timer Y distance
 input bool SendEmailAlert = false; // Send email when ADR reached
 input bool DebugLogger = false;
 
@@ -273,6 +278,22 @@ const int &spread[])
     }
     else
         ObjectDelete("[MR_ADR] Spread Label");
+
+    // Display Bar Close Timer
+    if(ShowTimer)
+    {
+        long remaining = (long)(time[0] + PeriodSeconds() - TimeCurrent());
+        if(remaining < 0) remaining = 0;
+        
+        int hours = (int)(remaining / 3600);
+        int minutes = (int)((remaining % 3600) / 60);
+        int seconds = (int)(remaining % 60);
+        
+        string timerText = "Time: " + StringFormat("%02d:%02d:%02d", hours, minutes, seconds);
+        SetLabel("Timer", timerText, TimerColor, TimerFontSize, TimerX, TimerY);
+    }
+    else
+        ObjectDelete("[MR_ADR] Timer Label");
 
     return(rates_total);
 }
