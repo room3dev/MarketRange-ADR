@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2026, MarketRange"
 #property link        "https://github.com/room3dev/MarketRange-ADR"
-#property version     "1.06"
+#property version     "1.07"
 #property strict
 #property indicator_chart_window
 
@@ -250,6 +250,9 @@ const int &spread[])
    else
       ObjectDelete("[MR_ADR] ADR Percent Label");
 
+    string infoStr = "MarketRange ADR(" + IntegerToString(ATRPeriod) + "): " + DoubleToStr(adr / Point, 0) + " pips\n" +
+                     "Today Range: " + DoubleToStr((today_high - today_low) / Point, 0) + " pips\n" +
+                     "ADR Reached: " + (adr_reached ? "YES" : "NO");
     Comment(infoStr);
 
     // Display Spread
