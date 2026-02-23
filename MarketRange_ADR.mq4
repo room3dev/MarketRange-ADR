@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2026, MarketRange"
 #property link        "https://github.com/room3dev/MarketRange-ADR"
-#property version     "1.11"
+#property version     "1.13"
 #property strict
 #property indicator_chart_window
 
@@ -28,6 +28,7 @@ input color LabelColor = clrWhite;// Percent label color
 input int LabelFontSize = 12; // Percent label size
 input bool ShowPercentLabel = false; // Show Upsize/Down Size label
 input bool ShowMidLine = false; // Show ADR Mid line
+input bool ShowPDHPDL = true; // Show Prev Day High/Low
 input bool ShowSpread = true; // Show current Spread
 input color SpreadColor = clrWhite; // Spread color
 input int SpreadFontSize = 18; // Spread font size
@@ -103,7 +104,7 @@ const int &spread[])
     int idxlastbarofyesterday = 0;
 
    // Calculate day indices based on timezone
-    ComputeDayIndices(TimeZoneOfData, TimeZoneOfSession, idxfirstbaroftoday, idxfirstbarofyesterday, idxlastbarofyesterday);
+    ComputeDayIndices(time, TimeZoneOfData, TimeZoneOfSession, idxfirstbaroftoday, idxfirstbarofyesterday, idxlastbarofyesterday);
 
    // Update variables
     lasttimeframe = Period();
@@ -198,7 +199,7 @@ const int &spread[])
    double prev_day_low = 0;
    datetime prev_day_start_time = 0;
 
-   if(idxfirstbarofyesterday > 0 && idxfirstbarofyesterday > idxlastbarofyesterday)
+   if(idxfirstbarofyesterday > 0 && idxfirstbarofyesterday >= idxlastbarofyesterday)
    {
       prev_day_start_time = time[idxfirstbarofyesterday];
       prev_day_high = high[idxfirstbarofyesterday];
@@ -234,10 +235,15 @@ const int &spread[])
 
    SetLevel("Daily Open", today_open, LineColorOpen, STYLE_SOLID, 1, startofday);
    
-   if(prev_day_high > 0 && prev_day_low > 0)
+   if(ShowPDHPDL && prev_day_high > 0 && prev_day_low > 0)
    {
       SetLevel("Prev Day High", prev_day_high, LineColorPDH_PDL, LineStylePDH_PDL, 1, prev_day_start_time);
       SetLevel("Prev Day Low", prev_day_low, LineColorPDH_PDL, LineStylePDH_PDL, 1, prev_day_start_time);
+   }
+   else if(!ShowPDHPDL)
+   {
+      ObjectDelete("[MR_ADR] Prev Day High Line");
+      ObjectDelete("[MR_ADR] Prev Day Low Line");
    }
 
    // Calculate Move Percents
@@ -301,54 +307,67 @@ const int &spread[])
 //+------------------------------------------------------------------+
 //| Compute index of first/last bar of yesterday and today           |
 //+------------------------------------------------------------------+
-void ComputeDayIndices(int tzlocal, int tzdest, int &idxToday, int &idxYesterdayStart, int &idxYesterdayEnd)
+void ComputeDayIndices(const datetime &time_arr[], int tzlocal, int tzdest, int &idxToday, int &idxYesterdayStart, int &idxYesterdayEnd)
 {
     int tzdiffsec = (tzlocal + tzdest) * 3600;
-    int period = Period();
-    int barsperday = (24 * 60) / (period == 0 ? 1 : period);
-   
-    int dayToday = TimeDayOfWeek(Time[0] - tzdiffsec);
-    int dayYesterday;
-
-    switch(dayToday)
-    {
-        case 6: // Sat
-        case 0: // Sun
-        case 1: // Mon
-        dayYesterday = 5; // Previous Friday
-        break;
-        default:
-        dayYesterday = dayToday - 1;
-        break;
-    }
-
+    int totalBars = ArraySize(time_arr);
+    
     idxToday = 0;
-    for(int i = 0; i <= barsperday + 1; i++)
+    idxYesterdayStart = 0;
+    idxYesterdayEnd = 0;
+
+    int dayToday = TimeDayOfWeek(time_arr[0] - tzdiffsec);
+    
+    // 1. Find the start (earliest bar) of today
+    // We look back until the day changes
+    for(int i = 0; i < totalBars; i++)
     {
-        if(TimeDayOfWeek(Time[i] - tzdiffsec) != dayToday)
+        if(TimeDayOfWeek(time_arr[i] - tzdiffsec) != dayToday)
         {
             idxToday = i - 1;
             break;
         }
     }
 
-    idxYesterdayEnd = 0;
-    for(int j = idxToday + 1; j <= 2 * barsperday + 1; j++)
+    // 2. Determine what "yesterday" day we are looking for
+    int dayYesterday;
+    switch(dayToday)
     {
-        if(TimeDayOfWeek(Time[j] - tzdiffsec) == dayYesterday)
+        case 0: // Sun
+        case 1: // Mon
+            dayYesterday = 5; // Previous Friday
+            break;
+        case 6: // Sat
+            dayYesterday = 5; // Previous Friday
+            break;
+        default:
+            dayYesterday = dayToday - 1;
+            break;
+    }
+
+    // 3. Find the latest bar (end of sequence) of yesterday
+    // Search up to 10000 bars or total available
+    int searchLimit = MathMin(totalBars - 1, idxToday + 10000);
+    for(int j = idxToday + 1; j <= searchLimit; j++)
+    {
+        if(TimeDayOfWeek(time_arr[j] - tzdiffsec) == dayYesterday)
         {
             idxYesterdayEnd = j;
             break;
         }
     }
 
-    idxYesterdayStart = idxYesterdayEnd;
-    for(int k = 1; k <= barsperday; k++)
+    // 4. Find the earliest bar (start of sequence) of yesterday
+    if(idxYesterdayEnd > 0)
     {
-        if(TimeDayOfWeek(Time[idxYesterdayEnd + k] - tzdiffsec) != dayYesterday)
+        idxYesterdayStart = idxYesterdayEnd;
+        for(int k = idxYesterdayEnd + 1; k <= searchLimit; k++)
         {
-            idxYesterdayStart = idxYesterdayEnd + k - 1;
-            break;
+            if(TimeDayOfWeek(time_arr[k] - tzdiffsec) != dayYesterday)
+            {
+                idxYesterdayStart = k - 1;
+                break;
+            }
         }
     }
 }
